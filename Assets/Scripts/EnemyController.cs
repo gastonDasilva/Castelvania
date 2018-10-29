@@ -28,14 +28,17 @@ public class EnemyController : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb2d.AddForce(Vector2.right * speed);
-        float limitedSpeed = Mathf.Clamp(rb2d.velocity.x, -maxSpeed, maxSpeed);
-        rb2d.velocity = new Vector2(limitedSpeed, rb2d.velocity.y);
-        if (rb2d.velocity.x > -0.01f && rb2d.velocity.x < 0.01f) // si la velocidad es o Entra al if
-        {                                                           // Es decir si se choco con algu objeto
-            speed = -speed;
-            rb2d.velocity = new Vector2(speed, rb2d.velocity.y);
-            CambiarDireccionDependiendo(speed);
+        if (rb2d.bodyType != RigidbodyType2D.Static)
+        {
+            rb2d.AddForce(Vector2.right * speed);
+            float limitedSpeed = Mathf.Clamp(rb2d.velocity.x, -maxSpeed, maxSpeed);
+            rb2d.velocity = new Vector2(limitedSpeed, rb2d.velocity.y);
+            if (rb2d.velocity.x > -0.01f && rb2d.velocity.x < 0.01f) // si la velocidad es o Entra al if
+            {                                                           // Es decir si se choco con algu objeto
+                speed = -speed;
+                rb2d.velocity = new Vector2(speed, rb2d.velocity.y);
+                CambiarDireccionDependiendo(speed);
+            }
         }
     }
 
@@ -57,13 +60,21 @@ public class EnemyController : MonoBehaviour
         if(collision.gameObject.tag == "Player")
         {
             Debug.Log("Choco con el player");
-            collision.gameObject.SendMessage("EstoyAtacando", this.gameObject);
+            // collision.gameObject.SendMessage("EstoyAtacando", this.gameObject);
+            collision.gameObject.SendMessage("EnemyKnockBack", this.gameObject.transform.position.x);
         }
-        
-    }
+
+        if (collision.gameObject.tag == "PlayerAttack")
+        {
+            Debug.Log("Choco con el player Atacanado ?");
+            collision.gameObject.GetComponentInParent<PlayerController>().SendMessage("EstoyAtacando", this.gameObject);
+        }
+
+        }
 
     void EnemigoMuerto()
     {
+        /*Realiza el proceso de Muerte */
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
 
         rb2d.bodyType = RigidbodyType2D.Static;
@@ -74,10 +85,22 @@ public class EnemyController : MonoBehaviour
             audioEnemy.Play();
         }
         anim.SetTrigger("Died");
-        //audioEnemy.clip = clipEnemyDie;
-        //audioEnemy.Play();
         Invoke("DestroyEnemy", 1f);
+        DesactivarAllColliders();
     }
+
+    public void DesactivarAllColliders()
+    {
+        /* Recorre los colliders que posee el enemigo y los desactiva*/
+        Collider2D[] colliders =  this.gameObject.GetComponentsInChildren<Collider2D>(); // retorna todos los colliders
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider2D col = colliders[i];
+            col.enabled = !col.enabled;
+        }
+    }
+
+
 
     void DestroyEnemy()
     {
@@ -85,16 +108,15 @@ public class EnemyController : MonoBehaviour
     }
 
     void CreateCoin()
-    {// Objeto a Instanciar, posicion actual del gameObject, variable necesaria para el instantiate
+    {/* Objeto a Instanciar, posicion actual del gameObject, variable necesaria para el instantiate*/
 
         Vector3 transformUpdate = new Vector3 (transform.position.x,transform.position.y , transform.position.z);
         Instantiate(CoinPreFab, transformUpdate, Quaternion.identity);
     }
 
     public void GeneratorCoins()
-    {
-        /// Este metodo propio de Unity realiza una invocacion cada
-        /// determinado tiempo, el 0f es para la primera vez que lo invoca
+    { /* Este metodo propio de Unity realiza una invocacion cada determinado tiempo, 
+       * el 0f es para la primera vez que lo invoca*/
         Invoke("CreateCoin", 0f);
     }
 }

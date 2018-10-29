@@ -122,6 +122,7 @@ TextureImporter:
     21300234: twilight-tiles-2_117
     21300236: twilight-tiles-2_118
     21300238: twilight-tiles-2_119
+    21300240: twilight-tiles-2_120
   externalObjects: {}
   serializedVersion: 7
   mipmaps:
@@ -2599,6 +2600,26 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: 64392b60732b8ee4ba05698ace5782ee
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: twilight-tiles-2_120
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 25
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 260962a68c228f149a6fdcb04d32612c
       vertices: []
       indices: 
       edges: []

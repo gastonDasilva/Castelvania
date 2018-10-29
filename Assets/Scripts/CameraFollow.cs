@@ -38,6 +38,13 @@ public class CameraFollow : MonoBehaviour {
     void Parallax(float posX)
     {
         float finalSpeed = parallaxVelocidad * Time.deltaTime;
-        background.uvRect = new Rect(background.uvRect.x + finalSpeed, 0f , 1f, 1f);
+        // background.uvRect = new Rect(background.uvRect.x + finalSpeed, 0f , 1f, 1f);
+        background.uvRect = new Rect(this.GetCameraTransform().position.x * 0.02f + finalSpeed, 0f, 1f, 1f);
+    }
+
+    Transform GetCameraTransform()
+    {
+        //return this.GetComponentInParent<Transform>();
+        return this.gameObject.transform;
     }
 }

@@ -7,6 +7,10 @@ TagManager:
   - Ground
   - Coin
   - Enemy
+  - PinchosVertical
+  - PinchosHorizontal
+  - PlayerAttack
+  - Plataform
   layers:
   - Default
   - TransparentFX
@@ -46,4 +50,7 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 1772690245
+    locked: 0
+  - name: Interfaces
+    uniqueID: 1698324279
     locked: 0

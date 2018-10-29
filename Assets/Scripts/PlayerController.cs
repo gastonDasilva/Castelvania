@@ -8,15 +8,23 @@ public class PlayerController : MonoBehaviour {
     public bool grounded;
     public float jumpPower = 6.5f;
     public GameObject game;
-
+    public AudioClip DieClip;
+    public GameObject healhtbar;
 
     private Rigidbody2D rb2d;
     private Animator anim;
     private bool jump;
+    private bool movement = true;
+    private bool puedeAtacar = true;
+    private AudioSource audioPlayer;
+    private SpriteRenderer sprt;
+
     // Use this for initialization
     void Start() {
         rb2d = GetComponent<Rigidbody2D>(); // detecta automaticamente el rigidbody
         anim = GetComponent<Animator>();// detecta automaticamente el animator, para gestionar las animaciones
+        audioPlayer = GetComponent<AudioSource>();
+        sprt = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -31,40 +39,57 @@ public class PlayerController : MonoBehaviour {
 
     void FixedUpdate()
     {
-        Vector3 fixedVelocity = rb2d.velocity;// Para corregir la frision provista por el materials 2D
-        fixedVelocity.x *= 0.75f;
-        if (grounded)
+        if (rb2d.bodyType != RigidbodyType2D.Static)
         {
-            rb2d.velocity = fixedVelocity;
+            Vector3 fixedVelocity = rb2d.velocity;// Para corregir la frision provista por el materials 2D
+            fixedVelocity.x *= 0.75f;
+            if (grounded)
+                {
+                rb2d.velocity = fixedVelocity;
+                }
+
+
+            float h = Input.GetAxis("Horizontal"); // para detectar la flechas que se aprientan, -1 para <- y 1 para ->
+            if (!movement) h = 0; // gestiona que el personaje no pueda moverse si recibe daño
+
+            rb2d.AddForce(Vector2.right * speed * h);
+
+            float limitedSpeed = Mathf.Clamp(rb2d.velocity.x, -maxSpeed, maxSpeed);
+            rb2d.velocity = new Vector2(limitedSpeed, rb2d.velocity.y);
+
+            this.cambiarDireccion(h);
+            this.EfectuarSalto();
+            this.EfectuarAtaque();
         }
+        
+    }
 
-
-        float h = Input.GetAxis("Horizontal"); // para detectar la flechas que se aprientan, -1 para <- y 1 para ->
-
-        rb2d.AddForce(Vector2.right * speed * h);
-
-        float limitedSpeed = Mathf.Clamp(rb2d.velocity.x, -maxSpeed, maxSpeed);
-        rb2d.velocity = new Vector2(limitedSpeed, rb2d.velocity.y);
-
-        cambiarDireccion(h);
-
+    public void EfectuarSalto()
+    {/* Gestiona el salto del player. Cuando se apreta la flecha para arriba y no esta saltando
+      * se produce el salto
+      */
         if (jump)
         {
             rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
             rb2d.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse); // Fisica del SALTO
             jump = false;
         }
+    }
 
-
+    public void EfectuarAtaque()
+    {/* Realiza un Ataque. Este se produce al hacer click y este método se encarga de realizar 
+      * todo el proceso 
+      */
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         bool ataca = stateInfo.IsName("Player_Attack");
-        if (Input.GetMouseButtonDown(0)&& ataca != true) // Detecta el click del boton derecho y efectua un ataque
-        {
-            //UpdateState("Player_Attack");
+        if (Input.GetMouseButtonDown(0) && ataca != true && puedeAtacar)
+        {// Detecta el click del boton derecho y efectua un ataque si está en condiciones
             anim.SetTrigger("Atacking");
-            
         }
     }
+
+
+    
 
 
     public void UpdateState(string state = null)
@@ -74,8 +99,42 @@ public class PlayerController : MonoBehaviour {
             anim.Play(state);
         }
     }
+
+    void ActivarMuerte()
+    {/* Gestiona  el proceso que hace el personaje cuando muere 
+        */
+        audioPlayer.clip = DieClip;
+        audioPlayer.Play();
+        rb2d.bodyType = RigidbodyType2D.Static;
+        anim.SetTrigger("Die");
+        anim.SetTrigger("Default");
+        Invoke("ResetScene", 2f);
+        puedeAtacar = false;
+        DesactivarAllColliders();
+    }
+
+    public void DesactivarAllColliders()
+    {
+        /* Recorre los colliders que posee el enemigo y los desactiva*/
+        Collider2D[] colliders = this.gameObject.GetComponentsInChildren<Collider2D>(); // retorna todos los colliders
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider2D col = colliders[i];
+            col.enabled = false;
+        }
+    }
+
+    void ResetScene()
+    {
+        game.SendMessage("RestarGame");
+    }
+
     void cambiarDireccion(float h)
     {
+        /* Se encarga de cambiar la direccion del Player dependiendo de su velocidad, si esta es negativa
+         * su direccion cambia a Izquierda, por lo contrario se cambia a Derecha 
+         
+         */
         if (h > 0.1f)
         {
             transform.localScale = new Vector3(1f, 1f, 1f); // Gestiona la direccion de la animacion
@@ -105,7 +164,9 @@ public class PlayerController : MonoBehaviour {
             Debug.Log("Player Esta Atacando");
             ememy.SendMessage("EnemigoMuerto");
         }
-        else { Debug.Log("Player NOOO Esta Atacando"); }
+        else {
+           // this.EnemyKnockBack(ememy.gameObject.transform.position.x);
+            Debug.Log("Player NOOO Esta Atacando"); }
         
         //game.SendMessage("IncreasePoint", transform.position.y);
     }
@@ -115,6 +176,7 @@ public class PlayerController : MonoBehaviour {
         if (collision.gameObject.tag == "Enemy")
         {
             Debug.Log("Choco con Un Enemigo");
+            healhtbar.SendMessage("RecibirDanho", 2f);
         }
         if (collision.gameObject.tag == "Coin")
         {
@@ -122,7 +184,34 @@ public class PlayerController : MonoBehaviour {
             collision.gameObject.SendMessage("GestionarRecolectarCoin");
             Debug.Log("Player Toco Una Moneda");
         }
+       
+    }
+    public void EnemyKnockBack(float enemyPosx)
+    {/* Si el player es tocado por un Enemy este realiza un salto hacia atras y se le 
+      * resta parte de la vida  
+         */
+        jump = true;
+        float side = Mathf.Sign(enemyPosx - transform.position.x);
+        rb2d.AddForce(Vector2.left * side * jumpPower, ForceMode2D.Impulse); // Fisica del SALTO para atras 
+        movement = false;
+        puedeAtacar = false;
+        Invoke("EnableMovement", 1f);
+        sprt.color = Color.red;
+        //healhtbar.SendMessage("RecibirDanho", 2f);
+        RegistrarDanho(2f);
 
+    }
+
+    public void RegistrarDanho(float cantDanho)
+    {
+        healhtbar.SendMessage("RecibirDanho", cantDanho);
+    }
+
+    public void EnableMovement()
+    {
+        movement = true;
+        puedeAtacar = true;
+        sprt.color = Color.white;
     }
 
 
