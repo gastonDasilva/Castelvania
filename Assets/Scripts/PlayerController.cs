@@ -161,12 +161,11 @@ public class PlayerController : MonoBehaviour {
         bool ataca = stateInfo.IsName("Player_Attack");
         if (ataca)
         {
-            Debug.Log("Player Esta Atacando");
             ememy.SendMessage("EnemigoMuerto");
         }
         else {
-           // this.EnemyKnockBack(ememy.gameObject.transform.position.x);
-            Debug.Log("Player NOOO Esta Atacando"); }
+            // this.EnemyKnockBack(ememy.gameObject.transform.position.x);
+        }
         
         //game.SendMessage("IncreasePoint", transform.position.y);
     }
@@ -175,16 +174,36 @@ public class PlayerController : MonoBehaviour {
     {
         if (collision.gameObject.tag == "Enemy")
         {
-            Debug.Log("Choco con Un Enemigo");
             healhtbar.SendMessage("RecibirDanho", 2f);
         }
         if (collision.gameObject.tag == "Coin")
         {
             game.SendMessage("IncreasePoint");
             collision.gameObject.SendMessage("GestionarRecolectarCoin");
-            Debug.Log("Player Toco Una Moneda");
         }
-       
+
+        if (collision.gameObject.tag == "DoorMovile")
+        {
+           // collision.gameObject.SendMessage("GestionarMovimientoDePuerta");
+           collision.gameObject.GetComponentInParent<MovementDoor>().SendMessage("GestionarMovimientoDePuerta");
+        }
+
+        if (collision.gameObject.tag == "PinchosMovile")
+        {
+            collision.gameObject.GetComponentInParent<MovementPinchos>().SendMessage("GestionarMovimientoDePinchos");
+        }
+
+        if (collision.gameObject.tag == "GeneratorBalls")
+        {
+            collision.gameObject.GetComponentInParent<GeneradorDeBolas>().SendMessage("StartShow");
+        }
+
+        if (collision.gameObject.tag == "End")
+        {
+            game.gameObject.SendMessage("RestarGame");
+        }
+
+
     }
     public void EnemyKnockBack(float enemyPosx)
     {/* Si el player es tocado por un Enemy este realiza un salto hacia atras y se le 

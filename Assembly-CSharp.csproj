@@ -65,10 +65,15 @@
     <Compile Include="Assets\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\CoinController.cs" />
     <Compile Include="Assets\Scripts\DetectorDeSuelo.cs" />
+    <Compile Include="Assets\Scripts\EndController.cs" />
     <Compile Include="Assets\Scripts\EnemyAttack.cs" />
     <Compile Include="Assets\Scripts\EnemyController.cs" />
     <Compile Include="Assets\Scripts\gameController.cs" />
+    <Compile Include="Assets\Scripts\GeneradorDeBolas.cs" />
     <Compile Include="Assets\Scripts\GestionDeMovimiento.cs" />
+    <Compile Include="Assets\Scripts\MenuController.cs" />
+    <Compile Include="Assets\Scripts\MovementDoor.cs" />
+    <Compile Include="Assets\Scripts\MovementPinchos.cs" />
     <Compile Include="Assets\Scripts\PlataformaMovil.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\SlashAcid.cs" />

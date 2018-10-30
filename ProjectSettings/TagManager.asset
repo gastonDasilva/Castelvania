@@ -11,6 +11,10 @@ TagManager:
   - PinchosHorizontal
   - PlayerAttack
   - Plataform
+  - DoorMovile
+  - PinchosMovile
+  - GeneratorBalls
+  - End
   layers:
   - Default
   - TransparentFX

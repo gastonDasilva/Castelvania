@@ -12,6 +12,8 @@ public class gameController : MonoBehaviour {
     private int points = 0;
     // Use this for initialization
     void Start () {
+        pointText.text =  GetMaxScore().ToString();
+        points = GetMaxScore();
         musicPlayer = GetComponent<AudioSource>();
         musicPlayer.Play();
     }
@@ -25,11 +27,26 @@ public class gameController : MonoBehaviour {
     {
             points += 1;
             pointText.text = points.ToString();
-            //SaveScore(points);
+            SaveScore(points);
     }
 
     public void RestarGame()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("Nuevo");
+    }
+
+    public void MenuGame()
+    {
+        SceneManager.LoadScene("End");
+    }
+
+    public void SaveScore(int currentPoint)
+    {// guarda el score que el jugador logro
+        PlayerPrefs.SetInt("Max Points", currentPoint);
+    }
+
+    public int GetMaxScore()
+    { // devuelve el score maximo que el jugador pudo lograr
+        return PlayerPrefs.GetInt("Max Points", 0);
     }
 }

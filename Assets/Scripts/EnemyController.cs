@@ -59,14 +59,12 @@ public class EnemyController : MonoBehaviour
     {
         if(collision.gameObject.tag == "Player")
         {
-            Debug.Log("Choco con el player");
             // collision.gameObject.SendMessage("EstoyAtacando", this.gameObject);
             collision.gameObject.SendMessage("EnemyKnockBack", this.gameObject.transform.position.x);
         }
 
         if (collision.gameObject.tag == "PlayerAttack")
         {
-            Debug.Log("Choco con el player Atacanado ?");
             collision.gameObject.GetComponentInParent<PlayerController>().SendMessage("EstoyAtacando", this.gameObject);
         }
 
